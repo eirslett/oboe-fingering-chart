@@ -334,7 +334,7 @@
 
           svg.addEventListener("click", (e) => {
             const id = e.target.id;
-            if (!id || id === "separator") return;
+            if (!id || id === "separator" || id === "svg1") return;
 
             if (activeIds.has(id)) {
               // Turn off
