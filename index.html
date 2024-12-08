@@ -198,6 +198,15 @@
           newParams.toString() ? "?" + newParams.toString() : ""
         }`;
         window.history.replaceState({}, "", newUrl);
+        
+        // Reset the style of all paired elements that aren't active
+        Object.values(pairs).forEach(halfHoleId => {
+          const halfHoleElement = document.getElementById(halfHoleId);
+          if (halfHoleElement && !activeIds.has(halfHoleId)) {
+            halfHoleElement.style.fill = originalColors.get(halfHoleId) || "";
+          }
+        });
+        
         updateActiveLeftButtons();
         updateActiveRightButtons();
       }
