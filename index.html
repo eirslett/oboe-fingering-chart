@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Oboe Fingering Chart</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
+        line-height: 1.6;
+        padding: 20px;
+        max-width: 100%;
+        overflow-x: hidden;
+        font-size: 12px;
+      }
+
+      h1 {
+        text-align: center;
+        color: #333;
+        margin: 0;
+        padding: 0;
+        font-size: 2rem;
+      }
+      h2 {
+        margin: 0;
+        padding: 0;
+        font-size: 1.2rem;
+      }
+
+      @media (max-width: 600px) {
+        body {
+          padding: 10px;
+        }
+
+        h1 {
+          font-size: 1.5rem;
+        }
+      }
+    </style>
+  </head>
+  <body
+    style="
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    "
+  >
+    <div style="text-align: center; padding: 10px">
+      <h1 style="margin: 0">Oboe</h1>
+    </div>
+
+    <div
+      style="
+        flex: 1;
+        display: flex;
+        align-items: stretch;
+        min-height: 0;
+        overflow: hidden;
+      "
+    >
+      <div
+        style="
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+          justify-content: flex-end;
+          padding: 20px;
+        "
+      >
+        <h2>Right hand</h2>
+        <div id="activeRightButtons"></div>
+      </div>
+
+      <div
+        id="svgContainer"
+        style="
+          flex: 2;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          overflow: hidden;
+        "
+      >
+        <!-- SVG will be inserted here -->
+      </div>
+
+      <div
+        style="
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          padding: 20px;
+        "
+      >
+        <h2>Left hand</h2>
+        <div id="activeLeftButtons"></div>
+      </div>
+    </div>
+
+    <script>
+      const urlParams = new URLSearchParams(window.location.search);
+      const activeIds = new Set(
+        urlParams.get("active")?.split(",").filter(Boolean) || []
+      );
+
+      const originalColors = new Map();
+      const pairs = {
+        b: "b-half",
+        a: "a-half",
+        g: "g-half",
+        e: "e-half",
+        d: "d-half",
+      };
+
+      const leftHandButtons = [
+        "octave-3",
+        "octave-2",
+        "octave-1",
+        "b",
+        "b-half",
+        "bd",
+        "left-c-d-trill",
+        "a",
+        "bd2",
+        "a-half",
+        "left-c-c-sharp-trill",
+        "g",
+        "g-half",
+        "left-g-sharp",
+        "left-f",
+        "left-e-flat",
+        "low-b",
+        "low-b-flat",
+      ];
+
+      const rightHandButtons = [
+        "right-a-sharp",
+        "right-g-sharp",
+        "f-sharp",
+        "right-c-d-trill",
+        "e",
+        "e-half",
+        "right-f",
+        "d",
+        "d-half",
+        "philadelphia",
+        "right-c",
+        "right-c-sharp",
+        "right-eb",
+        "f-resonance",
+      ];
+
+      function updateActiveLeftButtons() {
+        const activeLeftButtons = leftHandButtons
+          .filter((id) => activeIds.has(id))
+          .map((id) => {
+            const element = document.getElementById(id);
+            return element ? element.getAttribute("inkscape:label") || id : id;
+          });
+
+        document.getElementById("activeLeftButtons").innerHTML =
+          activeLeftButtons.length > 0
+            ? activeLeftButtons.map((label) => `<div>${label}</div>`).join("")
+            : '<div style="color: #666;">None</div>';
+      }
+
+      function updateActiveRightButtons() {
+        const activeRightButtons = rightHandButtons
+          .filter((id) => activeIds.has(id))
+          .map((id) => {
+            const element = document.getElementById(id);
+            return element ? element.getAttribute("inkscape:label") || id : id;
+          });
+
+        document.getElementById("activeRightButtons").innerHTML =
+          activeRightButtons.length > 0
+            ? activeRightButtons.map((label) => `<div>${label}</div>`).join("")
+            : '<div style="color: #666;">None</div>';
+      }
+
+      function updateURL() {
+        const newParams = new URLSearchParams();
+        if (activeIds.size > 0) {
+          newParams.set("active", Array.from(activeIds).join(","));
+        }
+        const newUrl = `${window.location.pathname}${
+          newParams.toString() ? "?" + newParams.toString() : ""
+        }`;
+        window.history.replaceState({}, "", newUrl);
+        updateActiveLeftButtons();
+        updateActiveRightButtons();
+      }
+
+      fetch("tegning.svg")
+        .then((response) => response.text())
+        .then((svgContent) => {
+          document.getElementById("svgContainer").innerHTML = svgContent;
+
+          const svg = document.querySelector("svg");
+          svg.style.width = "100%";
+          svg.style.height = "100%";
+          svg.style.maxWidth = "100%";
+          svg.style.maxHeight = "100%";
+          svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+
+          // Store all original colors first
+          document.querySelectorAll("svg *").forEach((element) => {
+            if (element.id) {
+              originalColors.set(
+                element.id,
+                element.style.fill || getComputedStyle(element).fill
+              );
+            }
+          });
+
+          // Apply initial states
+          activeIds.forEach((id) => {
+            const element = document.getElementById(id);
+            if (element) {
+              element.style.fill = "#060606";
+
+              // Hide and deselect paired half-hole if main hole is active
+              if (pairs[id]) {
+                const pairedElement = document.getElementById(pairs[id]);
+                if (pairedElement) {
+                  pairedElement.style.display = "none";
+                  activeIds.delete(pairs[id]);
+                }
+              }
+            }
+          });
+          updateURL();
+
+          svg.addEventListener("click", (e) => {
+            const id = e.target.id;
+            if (!id || id === "separator") return;
+
+            if (activeIds.has(id)) {
+              // Turn off
+              activeIds.delete(id);
+              e.target.style.fill = originalColors.get(id) || "";
+
+              // Show paired half-hole if exists
+              if (pairs[id]) {
+                const pairedElement = document.getElementById(pairs[id]);
+                if (pairedElement) {
+                  pairedElement.style.display = "";
+                }
+              }
+            } else {
+              // Turn on
+              activeIds.add(id);
+              e.target.style.fill = "#060606";
+
+              // Hide and deselect paired half-hole if exists
+              if (pairs[id]) {
+                const pairedElement = document.getElementById(pairs[id]);
+                if (pairedElement) {
+                  pairedElement.style.display = "none";
+                  activeIds.delete(pairs[id]);
+                }
+              }
+            }
+
+            updateURL();
+          });
+
+          svg.addEventListener("dblclick", (e) => {
+            e.preventDefault();
+          });
+        })
+        .catch((error) => {
+          console.error("Error loading SVG:", error);
+        });
+    </script>
+  </body>
+</html>
