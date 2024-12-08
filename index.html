@@ -171,7 +171,16 @@
 
         document.getElementById("activeLeftButtons").innerHTML =
           activeLeftButtons.length > 0
-            ? activeLeftButtons.map((label) => `<div>${label}</div>`).join("")
+            ? `<ul style="list-style: none; padding-left: 0;">
+                ${activeLeftButtons
+                  .map(
+                    (label) => `<li style="position: relative; padding-left: 8px;">
+                      <span style="position: absolute; left: 0; top: 0; content: '•'; font-size: 0.7em; line-height: 2.2;">•</span>
+                      ${label}
+                    </li>`
+                  )
+                  .join("")}
+               </ul>`
             : '<div style="color: #666;">None</div>';
       }
 
@@ -185,7 +194,16 @@
 
         document.getElementById("activeRightButtons").innerHTML =
           activeRightButtons.length > 0
-            ? activeRightButtons.map((label) => `<div>${label}</div>`).join("")
+            ? `<ul style="list-style: none; padding-left: 0;">
+                ${activeRightButtons
+                  .map(
+                    (label) => `<li style="position: relative; padding-left: 8px;">
+                      <span style="position: absolute; left: 0; top: 0; content: '•'; font-size: 0.7em; line-height: 2.2;">•</span>
+                      ${label}
+                    </li>`
+                  )
+                  .join("")}
+               </ul>`
             : '<div style="color: #666;">None</div>';
       }
 
