@@ -56,6 +56,66 @@
   >
     <div style="text-align: center; padding: 10px">
       <h1 style="margin: 0">Oboe</h1>
+      <div style="position: absolute; top: 10px; right: 10px">
+        <button
+          onclick="toggleExportMenu()"
+          style="
+            padding: 8px 16px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            background: white;
+            cursor: pointer;
+            font-size: 16px;
+          "
+        >
+          Share ▾
+        </button>
+        <div
+          id="exportMenu"
+          style="
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            min-width: 150px;
+          "
+        >
+          <button
+            onclick="copyURL()"
+            style="
+              display: block;
+              width: 100%;
+              padding: 12px 16px;
+              border: none;
+              background: none;
+              text-align: left;
+              cursor: pointer;
+              font-size: 16px;
+            "
+          >
+            Copy URL
+          </button>
+          <button
+            onclick="downloadSVG()"
+            style="
+              display: block;
+              width: 100%;
+              padding: 12px 16px;
+              border: none;
+              background: none;
+              text-align: left;
+              cursor: pointer;
+              font-size: 16px;
+            "
+          >
+            Download SVG
+          </button>
+        </div>
+      </div>
     </div>
 
     <div
@@ -84,7 +144,6 @@
       <div
         id="svgContainer"
         style="
-          flex: 2;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -174,7 +233,9 @@
             ? `<ul style="list-style: none; padding-left: 0;">
                 ${activeLeftButtons
                   .map(
-                    (label) => `<li style="position: relative; padding-left: 8px;">
+                    (
+                      label
+                    ) => `<li style="position: relative; padding-left: 8px;">
                       <span style="position: absolute; left: 0; top: 0; content: '•'; font-size: 0.7em; line-height: 2.2;">•</span>
                       ${label}
                     </li>`
@@ -197,7 +258,9 @@
             ? `<ul style="list-style: none; padding-left: 0;">
                 ${activeRightButtons
                   .map(
-                    (label) => `<li style="position: relative; padding-left: 8px;">
+                    (
+                      label
+                    ) => `<li style="position: relative; padding-left: 8px;">
                       <span style="position: absolute; left: 0; top: 0; content: '•'; font-size: 0.7em; line-height: 2.2;">•</span>
                       ${label}
                     </li>`
@@ -216,20 +279,20 @@
           newParams.toString() ? "?" + newParams.toString() : ""
         }`;
         window.history.replaceState({}, "", newUrl);
-        
+
         // Reset the style of all paired elements that aren't active
-        Object.values(pairs).forEach(halfHoleId => {
+        Object.values(pairs).forEach((halfHoleId) => {
           const halfHoleElement = document.getElementById(halfHoleId);
           if (halfHoleElement && !activeIds.has(halfHoleId)) {
             halfHoleElement.style.fill = originalColors.get(halfHoleId) || "";
           }
         });
-        
+
         updateActiveLeftButtons();
         updateActiveRightButtons();
       }
 
-      fetch("tegning.svg")
+      fetch("fingering-chart.svg")
         .then((response) => response.text())
         .then((svgContent) => {
           document.getElementById("svgContainer").innerHTML = svgContent;
@@ -310,6 +373,52 @@
         .catch((error) => {
           console.error("Error loading SVG:", error);
         });
+
+      function toggleExportMenu() {
+        const menu = document.getElementById("exportMenu");
+        menu.style.display = menu.style.display === "none" ? "block" : "none";
+
+        // Close menu when clicking outside
+        const closeMenu = (e) => {
+          if (!e.target.closest("#exportMenu") && !e.target.closest("button")) {
+            menu.style.display = "none";
+            document.removeEventListener("click", closeMenu);
+          }
+        };
+        document.addEventListener("click", closeMenu);
+      }
+
+      function copyURL() {
+        const currentUrl = window.location.href;
+        navigator.clipboard
+          .writeText(currentUrl)
+          .then(() => {
+            alert("URL copied to clipboard!");
+            document.getElementById("exportMenu").style.display = "none";
+          })
+          .catch((err) => {
+            console.error("Failed to copy URL:", err);
+            alert("Failed to copy URL");
+          });
+      }
+
+      function downloadSVG() {
+        const svg = document.querySelector("svg");
+        const serializer = new XMLSerializer();
+        const svgString = serializer.serializeToString(svg);
+
+        const blob = new Blob([svgString], { type: "image/svg+xml" });
+        const url = URL.createObjectURL(blob);
+
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "oboe-fingering.svg";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        document.getElementById("exportMenu").style.display = "none";
+      }
     </script>
   </body>
 </html>
