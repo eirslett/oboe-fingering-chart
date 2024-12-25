@@ -227,6 +227,9 @@ body {
   align-items: center;
   justify-content: center;
   background: none;
+
+  /* try to prevent blue buttons on iOS */
+  color: inherit;
 }
 
 .color-picker__button:first-child {
