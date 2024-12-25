@@ -252,3 +252,32 @@ body {
 .button-list__item--red .button-list__bullet {
   color: inherit;
 }
+
+/* Add these styles */
+.reset-button {
+  width: 32px;
+  height: 32px;
+  padding: 4px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  color: #666;
+}
+
+.reset-button:hover {
+  background: #f5f5f5;
+}
+
+/* Update color picker to accommodate reset button */
+.color-picker {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
